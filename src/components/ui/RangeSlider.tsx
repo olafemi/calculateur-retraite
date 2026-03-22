@@ -11,9 +11,11 @@ interface RangeSliderProps {
   value: number;
   min: number;
   max: number;
+  step?: number;
   minLabel: string;
   maxLabel: string;
   ariaValueText: string;
+  ariaDescribedBy?: string;
   onChange: (value: number) => void;
   onBlur?: () => void;
 }
@@ -23,9 +25,11 @@ export function RangeSlider({
   value,
   min,
   max,
+  step = 1,
   minLabel,
   maxLabel,
   ariaValueText,
+  ariaDescribedBy,
   onChange,
   onBlur,
 }: RangeSliderProps) {
@@ -38,11 +42,13 @@ export function RangeSlider({
         type="range"
         min={min}
         max={max}
+        step={step}
         value={value}
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={value}
         aria-valuetext={ariaValueText}
+        aria-describedby={ariaDescribedBy}
         onChange={(e) => onChange(Number(e.target.value))}
         onBlur={onBlur}
         className="range-slider w-full h-1.5 rounded-full appearance-none cursor-pointer focus:outline-none"

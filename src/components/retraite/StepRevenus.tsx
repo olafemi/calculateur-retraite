@@ -80,25 +80,27 @@ export function StepRevenus({ errors: externalErrors, onClearError }: StepRevenu
     [store, mergedErrors.revenuRetraite, onClearError]
   );
 
+  const isSalarie = statut === "salarie";
+
   const handleSalaireBlur = useCallback(() => {
     const err = validateStep4Field("salaireActuel" as Step4Field, {
       salaireActuel: data.salaireActuel,
       revenuRetraite: data.revenuRetraite,
-    });
+    }, statut);
     if (err) {
       setBlurErrors((prev) => ({ ...prev, salaireActuel: err }));
     }
-  }, [data.salaireActuel, data.revenuRetraite]);
+  }, [data.salaireActuel, data.revenuRetraite, statut]);
 
   const handleRevenuBlur = useCallback(() => {
     const err = validateStep4Field("revenuRetraite" as Step4Field, {
       salaireActuel: data.salaireActuel,
       revenuRetraite: data.revenuRetraite,
-    });
+    }, statut);
     if (err) {
       setBlurErrors((prev) => ({ ...prev, revenuRetraite: err }));
     }
-  }, [data.salaireActuel, data.revenuRetraite]);
+  }, [data.salaireActuel, data.revenuRetraite, statut]);
 
   return (
     <div ref={containerRef}>
@@ -115,10 +117,10 @@ export function StepRevenus({ errors: externalErrors, onClearError }: StepRevenu
         {/* Salaire actuel */}
         <CurrencyInput
           id="salaire-actuel"
-          label={copyDeck.salaireLabel}
+          label={isSalarie ? copyDeck.salaireLabel : `${copyDeck.salaireLabel} (optionnel)`}
           value={data.salaireActuel}
           placeholder="Ex : 250 000"
-          helperText={copyDeck.salaireHelper}
+          helperText={isSalarie ? copyDeck.salaireHelper : "Optionnel. Si renseigne, nous afficherons votre taux d'effort."}
           error={mergedErrors.salaireActuel}
           onChange={handleSalaireChange}
           onBlur={handleSalaireBlur}

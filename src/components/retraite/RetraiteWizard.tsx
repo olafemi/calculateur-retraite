@@ -3,7 +3,7 @@
  *
  * Orchestrates:
  * - Progress indicator (top)
- * - Current step content (middle)
+ * - Current step content (middle) OR results display
  * - Navigation buttons (bottom, sticky on mobile)
  *
  * Manages validation on "Suivant" click, error state distribution to steps,
@@ -16,7 +16,7 @@ import { StepIdentite } from "./StepIdentite.tsx";
 import { StepSituation } from "./StepSituation.tsx";
 import { StepObjectif } from "./StepObjectif.tsx";
 import { StepRevenus } from "./StepRevenus.tsx";
-import { StepResultsPlaceholder } from "./StepResultsPlaceholder.tsx";
+import { StepResults } from "./StepResults.tsx";
 import { useRetraiteStore, useWizardNav } from "../../stores/retraiteStore.ts";
 import { STEP_LABELS } from "../../types/retraite.ts";
 import type { WizardStep, StepStatus, ValidationErrors } from "../../types/retraite.ts";
@@ -32,7 +32,10 @@ export function RetraiteWizard() {
   // Build progress indicator step configs
   const progressSteps = ([1, 2, 3, 4] as WizardStep[]).map((step) => {
     let status: StepStatus;
-    if (step === nav.currentStep) {
+    if (nav.wizardCompleted) {
+      // All steps completed when showing results
+      status = "completed";
+    } else if (step === nav.currentStep) {
       status = "active";
     } else if (nav.completedSteps.includes(step)) {
       status = "completed";
@@ -49,10 +52,16 @@ export function RetraiteWizard() {
   // Handle step indicator click (jump to completed step)
   const handleStepClick = useCallback(
     (step: WizardStep) => {
-      store.goToStep(step);
+      if (nav.wizardCompleted) {
+        // From results, go back to wizard at the clicked step
+        store.setWizardCompleted(false);
+        store.goToStep(step);
+      } else {
+        store.goToStep(step);
+      }
       setStepErrors({});
     },
-    [store]
+    [store, nav.wizardCompleted]
   );
 
   // Handle "Suivant" click
@@ -92,7 +101,7 @@ export function RetraiteWizard() {
     });
   }, []);
 
-  // If wizard is completed, show results placeholder
+  // If wizard is completed, show results
   if (nav.wizardCompleted) {
     return (
       <div role="form" aria-label="Calculateur de retraite">
@@ -100,7 +109,7 @@ export function RetraiteWizard() {
           steps={progressSteps}
           onStepClick={handleStepClick}
         />
-        <StepResultsPlaceholder />
+        <StepResults />
       </div>
     );
   }

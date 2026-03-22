@@ -13,8 +13,12 @@
  * - Changing DOB in Step 1 auto-adjusts retirement age if now invalid
  * - Validation is NOT stored here — it's computed on-demand via pure functions
  *   from src/utils/validation.ts. The store only stores form data and navigation.
+ * - Adjustable calculation parameters (return rate, inflation, life expectancy)
+ *   are persisted and exposed via setters for the results page sliders.
  *
- * Spec reference: docs/specs/milestone-4-wizard.md
+ * Spec references:
+ *   - docs/specs/milestone-4-wizard.md (form wizard)
+ *   - docs/specs/milestone-5-calculation.md (calculation engine + results)
  * =============================================================================
  */
 
@@ -31,6 +35,10 @@ import type {
 } from "../types/retraite";
 
 import { AGE_CONSTRAINTS } from "../types/retraite";
+
+import type { CalculationParams } from "../types/retraiteResults";
+import { CALCULATION_PARAM_DEFAULTS } from "../types/retraiteResults";
+
 import { computeAge, validateStep } from "../utils/validation";
 
 // ---------------------------------------------------------------------------
@@ -43,6 +51,11 @@ interface RetraiteWizardState extends RetraiteFormData {
   completedSteps: number[]; // steps that have been successfully validated (array for JSON serialization)
   wizardCompleted: boolean; // true after Step 4 validation passes (transition to results)
 
+  // -- Adjustable Calculation Parameters (persisted, used on results page) --
+  annualReturnRate: number;     // decimal, default 0 (0%), slider 0-20%
+  annualInflationRate: number;  // decimal, default 0.03 (3%), slider 0-10%
+  lifeExpectancy: number;       // integer, default 75, slider retirementAge+1 to 100
+
   // -- Actions: Field Setters (type-safe per field) --
   setPrenom: (value: string) => void;
   setNom: (value: string) => void;
@@ -54,6 +67,11 @@ interface RetraiteWizardState extends RetraiteFormData {
   setAgeRetraite: (value: number) => void;
   setSalaireActuel: (value: number | null) => void;
   setRevenuRetraite: (value: number | null) => void;
+
+  // -- Actions: Adjustable Parameter Setters --
+  setAnnualReturnRate: (value: number) => void;
+  setAnnualInflationRate: (value: number) => void;
+  setLifeExpectancy: (value: number) => void;
 
   // -- Actions: Navigation --
   /**
@@ -73,6 +91,12 @@ interface RetraiteWizardState extends RetraiteFormData {
    * Returns true if navigation was allowed.
    */
   goToStep: (step: WizardStep) => boolean;
+
+  /**
+   * Set wizardCompleted flag. Used by "Modifier mes informations" to go
+   * back to the wizard while preserving all form data.
+   */
+  setWizardCompleted: (value: boolean) => void;
 
   // -- Actions: Utility --
   /**
@@ -136,6 +160,10 @@ const INITIAL_NAV_STATE = {
   wizardCompleted: false,
 };
 
+const INITIAL_PARAMS_STATE: CalculationParams = {
+  ...CALCULATION_PARAM_DEFAULTS,
+};
+
 // ---------------------------------------------------------------------------
 // Helper: Cascade retirement age check after any DOB field changes
 // ---------------------------------------------------------------------------
@@ -181,6 +209,7 @@ export const useRetraiteStore = create<RetraiteWizardState>()(
       // -- Initial State --
       ...INITIAL_FORM_DATA,
       ...INITIAL_NAV_STATE,
+      ...INITIAL_PARAMS_STATE,
 
       // =====================================================================
       // Field Setters
@@ -238,12 +267,42 @@ export const useRetraiteStore = create<RetraiteWizardState>()(
         );
         const min = currentAge !== null ? currentAge + 1 : 1;
         const clamped = Math.max(min, Math.min(AGE_CONSTRAINTS.maxRetirementAge, value));
-        set({ ageRetraite: clamped });
+
+        // Also ensure life expectancy is at least retirementAge + 1
+        const updates: Partial<RetraiteWizardState> = { ageRetraite: clamped };
+        if (state.lifeExpectancy <= clamped) {
+          updates.lifeExpectancy = Math.min(clamped + 1, 100);
+        }
+        set(updates);
       },
 
       setSalaireActuel: (value) => set({ salaireActuel: value }),
 
       setRevenuRetraite: (value) => set({ revenuRetraite: value }),
+
+      // =====================================================================
+      // Adjustable Parameter Setters
+      // =====================================================================
+
+      setAnnualReturnRate: (value) => {
+        // Clamp to valid range: 0 to 0.20 (0% to 20%)
+        const clamped = Math.max(0, Math.min(0.20, value));
+        set({ annualReturnRate: clamped });
+      },
+
+      setAnnualInflationRate: (value) => {
+        // Clamp to valid range: 0 to 0.10 (0% to 10%)
+        const clamped = Math.max(0, Math.min(0.10, value));
+        set({ annualInflationRate: clamped });
+      },
+
+      setLifeExpectancy: (value) => {
+        // Clamp: min = retirementAge + 1, max = 100
+        const state = get();
+        const min = state.ageRetraite + 1;
+        const clamped = Math.max(min, Math.min(100, Math.round(value)));
+        set({ lifeExpectancy: clamped });
+      },
 
       // =====================================================================
       // Navigation Actions
@@ -300,6 +359,14 @@ export const useRetraiteStore = create<RetraiteWizardState>()(
         return false; // Navigation not allowed
       },
 
+      setWizardCompleted: (value) => {
+        set({ wizardCompleted: value });
+        // When going back to wizard from results, navigate to step 1
+        if (!value) {
+          set({ currentStep: 1 as WizardStep });
+        }
+      },
+
       // =====================================================================
       // Utility Actions
       // =====================================================================
@@ -308,6 +375,7 @@ export const useRetraiteStore = create<RetraiteWizardState>()(
         set({
           ...INITIAL_FORM_DATA,
           ...INITIAL_NAV_STATE,
+          ...INITIAL_PARAMS_STATE,
         });
       },
 
@@ -352,7 +420,7 @@ export const useRetraiteStore = create<RetraiteWizardState>()(
     }),
     {
       name: "retraite-wizard", // localStorage key
-      // Only persist form data and navigation state — NOT action functions
+      // Only persist form data, navigation state, and adjustable params — NOT action functions
       partialize: (state) => ({
         // Step 1
         prenom: state.prenom,
@@ -372,6 +440,10 @@ export const useRetraiteStore = create<RetraiteWizardState>()(
         currentStep: state.currentStep,
         completedSteps: state.completedSteps,
         wizardCompleted: state.wizardCompleted,
+        // Adjustable calculation parameters
+        annualReturnRate: state.annualReturnRate,
+        annualInflationRate: state.annualInflationRate,
+        lifeExpectancy: state.lifeExpectancy,
       }),
     }
   )
@@ -428,4 +500,18 @@ export const useWizardNav = () =>
     currentStep: s.currentStep,
     completedSteps: s.completedSteps,
     wizardCompleted: s.wizardCompleted,
+  })));
+
+/**
+ * Select adjustable calculation parameters from the store.
+ * Used by the ResultsAssumptions component for the sliders.
+ *
+ * IMPORTANT: Uses useShallow to prevent infinite re-render loops
+ * with Zustand 5 + React 19 when returning object selectors.
+ */
+export const useResultsParams = () =>
+  useRetraiteStore(useShallow((s) => ({
+    annualReturnRate: s.annualReturnRate,
+    annualInflationRate: s.annualInflationRate,
+    lifeExpectancy: s.lifeExpectancy,
   })));

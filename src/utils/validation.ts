@@ -459,17 +459,26 @@ export function getStep4Warnings(data: Step4Data): FieldWarning[] {
 
 /**
  * Validate a single field from Step 4 by name.
+ *
+ * @param statut - Professional status. Salary validation is skipped
+ *                 for non-salariés when the field is empty.
  */
 export function validateStep4Field(
   field: Step4Field,
-  data: Step4Data
+  data: Step4Data,
+  statut?: string | null
 ): string | null {
   switch (field) {
-    case "salaireActuel":
+    case "salaireActuel": {
+      const salaireRequired = statut === "salarie";
+      if (!salaireRequired && (data.salaireActuel === null || data.salaireActuel === 0)) {
+        return null; // optional and empty — no error
+      }
       return validateFCFAAmount(
         data.salaireActuel,
         "Veuillez entrer votre salaire mensuel."
       );
+    }
     case "revenuRetraite":
       return validateFCFAAmount(
         data.revenuRetraite,
@@ -482,15 +491,36 @@ export function validateStep4Field(
 
 /**
  * Validate all fields in Step 4.
+ *
+ * @param data   - Step 4 form data
+ * @param statut - Professional status from Step 2. Salary is required only
+ *                 for "salarie"; optional for freelance/etudiant/autre.
  */
-export function validateStep4(data: Step4Data): StepValidationResult<Step4Field> {
+export function validateStep4(
+  data: Step4Data,
+  statut?: string | null
+): StepValidationResult<Step4Field> {
   const errors: Step4Errors = {};
 
-  const salaireErr = validateFCFAAmount(
-    data.salaireActuel,
-    "Veuillez entrer votre salaire mensuel."
-  );
-  if (salaireErr) errors.salaireActuel = salaireErr;
+  // Salary is required only for salariés
+  const salaireRequired = statut === "salarie";
+  if (salaireRequired) {
+    const salaireErr = validateFCFAAmount(
+      data.salaireActuel,
+      "Veuillez entrer votre salaire mensuel."
+    );
+    if (salaireErr) errors.salaireActuel = salaireErr;
+  } else if (data.salaireActuel !== null) {
+    // If provided voluntarily, still validate min/max
+    const salaireErr = validateFCFAAmount(
+      data.salaireActuel,
+      "" // won't trigger — value is not null
+    );
+    // Only keep error if it's a range error, not "empty" error
+    if (salaireErr && data.salaireActuel > 0) {
+      errors.salaireActuel = salaireErr;
+    }
+  }
 
   const revenuErr = validateFCFAAmount(
     data.revenuRetraite,
@@ -531,7 +561,7 @@ export function validateStep(
     case 3:
       return validateStep3(formData, currentAge);
     case 4:
-      return validateStep4(formData);
+      return validateStep4(formData, formData.statut);
     default:
       return { valid: true, errors: {}, warnings: [] };
   }
