@@ -31,6 +31,7 @@ import { ResultsBreakdown } from "./ResultsBreakdown.tsx";
 import { ResultsEducationalNote } from "./ResultsEducationalNote.tsx";
 import { ResultsChart } from "./ResultsChart.tsx";
 import { ResultsAssumptions } from "./ResultsAssumptions.tsx";
+import { WhatsAppShareButton } from "./WhatsAppShareButton.tsx";
 import { Button } from "../ui/Button.tsx";
 
 export function StepResults() {
@@ -40,6 +41,7 @@ export function StepResults() {
   const formData = useRetraiteStore(
     useShallow((s) => ({
       prenom: s.prenom,
+      statut: s.statut,
       jourNaissance: s.jourNaissance,
       moisNaissance: s.moisNaissance,
       anneeNaissance: s.anneeNaissance,
@@ -223,7 +225,27 @@ export function StepResults() {
         />
       </div>
 
-      {/* 6. Educational note — "Comment on calcule" */}
+      {/* 6. WhatsApp share button */}
+      <div className="mt-6 flex justify-center">
+        <WhatsAppShareButton
+          prenom={formData.prenom}
+          epargneMensuelle={results.epargneMensuelle}
+          capitalCible={results.capitalCible}
+          yearsToRetirement={results.yearsToRetirement}
+          retirementAge={formData.ageRetraite}
+          capitalDisponible={results.capitalDisponible}
+          retirementDurationYears={results.params.retirementDurationYears}
+          revenuRetraite={formData.revenuRetraite ?? 0}
+          annualReturnRate={params.annualReturnRate}
+          totalContributions={results.totalContributions}
+          totalInterestEarned={results.totalInterestEarned}
+          savingsRatePercent={results.savingsRatePercent}
+          statut={formData.statut}
+          currentSalary={formData.salaireActuel ?? 0}
+        />
+      </div>
+
+      {/* 7. Educational note — "Comment on calcule" */}
       <ResultsEducationalNote
         epargneMensuelle={results.epargneMensuelle}
         capitalCible={results.capitalCible}
