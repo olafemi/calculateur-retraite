@@ -9,7 +9,6 @@ interface NavLink {
 const NAV_LINKS: NavLink[] = [
   { label: "Nos outils", href: "/#outils" },
   { label: "Tarifs", href: "/#tarifs" },
-  { label: "Se connecter", href: "/connexion" },
 ];
 
 export function Header() {
@@ -77,7 +76,7 @@ export function Header() {
         {/* Desktop CTA */}
         <div className="hidden md:flex">
           <Link
-            to="/connexion"
+            to="/outils/retraite"
             className="inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-accent-500 text-white hover:bg-accent-400 active:bg-accent-500 shadow-sm hover:shadow focus-visible:ring-accent-500 px-4 py-2 text-sm"
           >
             Commencer
@@ -152,7 +151,7 @@ export function Header() {
           </ul>
           <div className="mt-4 px-4">
             <Link
-              to="/connexion"
+              to="/outils/retraite"
               className="w-full inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-accent-500 text-white hover:bg-accent-400 shadow-sm hover:shadow focus-visible:ring-accent-500 px-5 py-2.5 text-base"
               onClick={closeMobileMenu}
             >

@@ -146,7 +146,7 @@ export function HeroSection() {
 
           <div className="mt-8 md:mt-10">
             <Link
-              to="/connexion"
+              to="/outils/retraite"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-accent-500 text-white hover:bg-accent-400 active:bg-accent-500 shadow-sm hover:shadow focus-visible:ring-accent-500 focus-visible:ring-offset-primary-900 px-8 py-3.5 text-lg"
             >
               Commencer gratuitement
