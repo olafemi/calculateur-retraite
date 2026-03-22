@@ -89,8 +89,10 @@ export interface ResultsData {
   monthsToRetirement: number;
   /** Total amount the user will deposit (epargneMensuelle * monthsToRetirement). */
   totalContributions: number;
-  /** Total gains from compound interest (capitalCible - totalContributions). */
+  /** Total gains from compound interest. */
   totalInterestEarned: number;
+  /** Existing savings taken into account (FCFA). 0 if not provided. */
+  capitalDisponible: number;
   /**
    * Percentage of current salary that goes to savings.
    * Formula: (epargneMensuelle / currentSalary) * 100.

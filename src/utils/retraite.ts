@@ -358,6 +358,7 @@ export function evaluateAlerts(
  * @param monthlyRetirementIncome - Desired monthly income during retirement (FCFA)
  * @param currentSalary           - Current monthly salary (FCFA, for savings rate)
  * @param params                  - Adjustable calculation parameters (optional, uses defaults)
+ * @param capitalDisponible       - Existing savings (FCFA, optional, default 0)
  * @returns Full ResultsData object
  */
 export function computeRetirementResults(
@@ -365,7 +366,8 @@ export function computeRetirementResults(
   retirementAge: number,
   monthlyRetirementIncome: number,
   currentSalary: number,
-  params?: Partial<CalculationParams>
+  params?: Partial<CalculationParams>,
+  capitalDisponible: number = 0
 ): ResultsData {
   // Merge provided params with defaults
   const fullParams: CalculationParams = {
@@ -389,15 +391,25 @@ export function computeRetirementResults(
     annualInflationRate
   );
 
+  // Future value of existing savings at retirement
+  const rn = annualToMonthlyRate(annualReturnRate);
+  const futureValueCapitalDisponible =
+    capitalDisponible > 0 && monthsToRetirement > 0
+      ? capitalDisponible * Math.pow(1 + rn, monthsToRetirement)
+      : capitalDisponible;
+
+  // Remaining capital to accumulate via monthly savings
+  const remainingCapital = Math.max(0, capitalCible - futureValueCapitalDisponible);
+
   const epargneMensuelle = computeEpargneMensuelle(
-    capitalCible,
+    remainingCapital,
     monthsToRetirement,
     annualReturnRate
   );
 
   // Supporting metrics
   const totalContributions = epargneMensuelle * monthsToRetirement;
-  const totalInterestEarned = Math.max(0, capitalCible - totalContributions);
+  const totalInterestEarned = Math.max(0, capitalCible - totalContributions - capitalDisponible);
   const savingsRatePercent =
     currentSalary > 0 ? (epargneMensuelle / currentSalary) * 100 : 0;
 
@@ -419,6 +431,7 @@ export function computeRetirementResults(
     monthsToRetirement,
     totalContributions,
     totalInterestEarned,
+    capitalDisponible,
     savingsRatePercent,
     retirementDurationYears,
     params: {

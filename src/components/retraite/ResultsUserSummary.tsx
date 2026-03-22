@@ -67,11 +67,13 @@ export function ResultsUserSummary() {
       ageRetraite: s.ageRetraite,
       salaireActuel: s.salaireActuel,
       revenuRetraite: s.revenuRetraite,
+      capitalDisponible: s.capitalDisponible,
     }))
   );
 
   const setAgeRetraite = useRetraiteStore((s) => s.setAgeRetraite);
   const setSalaireActuel = useRetraiteStore((s) => s.setSalaireActuel);
+  const setCapitalDisponible = useRetraiteStore((s) => s.setCapitalDisponible);
   const setRevenuRetraite = useRetraiteStore((s) => s.setRevenuRetraite);
 
   const currentAge = useMemo(
@@ -131,6 +133,14 @@ export function ResultsUserSummary() {
       setRevenuRetraite(parsed);
     },
     [setRevenuRetraite]
+  );
+
+  const handleCapitalChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const parsed = parseFCFAInput(e.target.value);
+      setCapitalDisponible(parsed);
+    },
+    [setCapitalDisponible]
   );
 
   return (
@@ -229,6 +239,30 @@ export function ResultsUserSummary() {
               value={formatFCFAInput(data.revenuRetraite)}
               onChange={handleRevenuChange}
               aria-label="Revenu souhaite a la retraite en FCFA"
+              className="w-36 h-9 text-right text-sm text-neutral-900 font-semibold bg-neutral-50 border border-neutral-200 rounded-md transition-colors duration-150 focus:border-primary-700 focus:ring-2 focus:ring-primary-700/20 focus:outline-none pr-12"
+            />
+            <span className="absolute right-2.5 text-xs font-medium text-neutral-400 pointer-events-none">
+              FCFA
+            </span>
+          </div>
+        </div>
+
+        {/* Capital deja disponible */}
+        <div className="flex justify-between items-center gap-4">
+          <label
+            htmlFor="summary-capital"
+            className="text-sm text-neutral-500 font-normal"
+          >
+            Capital deja disponible
+          </label>
+          <div className="relative inline-flex items-center">
+            <input
+              id="summary-capital"
+              type="text"
+              inputMode="numeric"
+              value={formatFCFAInput(data.capitalDisponible)}
+              onChange={handleCapitalChange}
+              aria-label="Capital deja disponible en FCFA"
               className="w-36 h-9 text-right text-sm text-neutral-900 font-semibold bg-neutral-50 border border-neutral-200 rounded-md transition-colors duration-150 focus:border-primary-700 focus:ring-2 focus:ring-primary-700/20 focus:outline-none pr-12"
             />
             <span className="absolute right-2.5 text-xs font-medium text-neutral-400 pointer-events-none">

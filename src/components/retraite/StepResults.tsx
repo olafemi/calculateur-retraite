@@ -46,6 +46,7 @@ export function StepResults() {
       ageRetraite: s.ageRetraite,
       salaireActuel: s.salaireActuel,
       revenuRetraite: s.revenuRetraite,
+      capitalDisponible: s.capitalDisponible,
     }))
   );
 
@@ -109,13 +110,15 @@ export function StepResults() {
       formData.ageRetraite,
       formData.revenuRetraite ?? 0,
       formData.salaireActuel ?? 0,
-      params
+      params,
+      formData.capitalDisponible ?? 0
     );
   }, [
     currentAge,
     formData.ageRetraite,
     formData.revenuRetraite,
     formData.salaireActuel,
+    formData.capitalDisponible,
     params,
   ]);
 
@@ -207,6 +210,7 @@ export function StepResults() {
           totalInterestEarned={results.totalInterestEarned}
           capitalCible={results.capitalCible}
           savingsRatePercent={results.savingsRatePercent}
+          capitalDisponible={results.capitalDisponible}
         />
 
         <ResultsChart

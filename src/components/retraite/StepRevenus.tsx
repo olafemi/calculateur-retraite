@@ -46,6 +46,7 @@ export function StepRevenus({ errors: externalErrors, onClearError }: StepRevenu
   const warnings = getStep4Warnings({
     salaireActuel: data.salaireActuel,
     revenuRetraite: data.revenuRetraite,
+    capitalDisponible: data.capitalDisponible,
   });
   const revenuWarning = warnings.find((w) => w.field === "revenuRetraite")?.message ?? null;
 
@@ -63,6 +64,13 @@ export function StepRevenus({ errors: externalErrors, onClearError }: StepRevenu
       }
     },
     [store, mergedErrors.salaireActuel, onClearError]
+  );
+
+  const handleCapitalChange = useCallback(
+    (value: number | null) => {
+      store.setCapitalDisponible(value);
+    },
+    [store]
   );
 
   const handleRevenuChange = useCallback(
@@ -86,16 +94,18 @@ export function StepRevenus({ errors: externalErrors, onClearError }: StepRevenu
     const err = validateStep4Field("salaireActuel" as Step4Field, {
       salaireActuel: data.salaireActuel,
       revenuRetraite: data.revenuRetraite,
+      capitalDisponible: data.capitalDisponible,
     }, statut);
     if (err) {
       setBlurErrors((prev) => ({ ...prev, salaireActuel: err }));
     }
-  }, [data.salaireActuel, data.revenuRetraite, statut]);
+  }, [data.salaireActuel, data.revenuRetraite, data.capitalDisponible, statut]);
 
   const handleRevenuBlur = useCallback(() => {
     const err = validateStep4Field("revenuRetraite" as Step4Field, {
       salaireActuel: data.salaireActuel,
       revenuRetraite: data.revenuRetraite,
+      capitalDisponible: data.capitalDisponible,
     }, statut);
     if (err) {
       setBlurErrors((prev) => ({ ...prev, revenuRetraite: err }));
@@ -137,6 +147,16 @@ export function StepRevenus({ errors: externalErrors, onClearError }: StepRevenu
           warning={!mergedErrors.revenuRetraite ? revenuWarning : null}
           onChange={handleRevenuChange}
           onBlur={handleRevenuBlur}
+        />
+
+        {/* Capital deja disponible (optionnel) */}
+        <CurrencyInput
+          id="capital-disponible"
+          label="Capital deja disponible (optionnel)"
+          value={data.capitalDisponible}
+          placeholder="Ex : 1 000 000"
+          helperText="Si vous avez deja de l'epargne, renseignez-la pour reduire votre effort mensuel."
+          onChange={handleCapitalChange}
         />
       </div>
     </div>

@@ -67,6 +67,7 @@ interface RetraiteWizardState extends RetraiteFormData {
   setAgeRetraite: (value: number) => void;
   setSalaireActuel: (value: number | null) => void;
   setRevenuRetraite: (value: number | null) => void;
+  setCapitalDisponible: (value: number | null) => void;
 
   // -- Actions: Adjustable Parameter Setters --
   setAnnualReturnRate: (value: number) => void;
@@ -152,6 +153,7 @@ const INITIAL_FORM_DATA: RetraiteFormData = {
   // Step 4
   salaireActuel: null,
   revenuRetraite: null,
+  capitalDisponible: null,
 };
 
 const INITIAL_NAV_STATE = {
@@ -279,6 +281,8 @@ export const useRetraiteStore = create<RetraiteWizardState>()(
       setSalaireActuel: (value) => set({ salaireActuel: value }),
 
       setRevenuRetraite: (value) => set({ revenuRetraite: value }),
+
+      setCapitalDisponible: (value) => set({ capitalDisponible: value }),
 
       // =====================================================================
       // Adjustable Parameter Setters
@@ -436,6 +440,7 @@ export const useRetraiteStore = create<RetraiteWizardState>()(
         // Step 4
         salaireActuel: state.salaireActuel,
         revenuRetraite: state.revenuRetraite,
+        capitalDisponible: state.capitalDisponible,
         // Navigation
         currentStep: state.currentStep,
         completedSteps: state.completedSteps,
@@ -490,6 +495,7 @@ export const useStep4Data = () =>
   useRetraiteStore(useShallow((s) => ({
     salaireActuel: s.salaireActuel,
     revenuRetraite: s.revenuRetraite,
+    capitalDisponible: s.capitalDisponible,
   })));
 
 /**

@@ -128,8 +128,9 @@ export interface Step3Data {
 
 /** Step 4 form data. */
 export interface Step4Data {
-  salaireActuel: number | null;   // raw integer in FCFA
-  revenuRetraite: number | null;  // raw integer in FCFA
+  salaireActuel: number | null;    // raw integer in FCFA
+  revenuRetraite: number | null;   // raw integer in FCFA
+  capitalDisponible: number | null; // raw integer in FCFA — existing savings (optional)
 }
 
 /** FCFA amount constraints (shared between both fields in Step 4). */

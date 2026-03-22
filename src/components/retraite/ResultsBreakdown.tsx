@@ -12,6 +12,7 @@ interface ResultsBreakdownProps {
   totalInterestEarned: number;
   capitalCible: number;
   savingsRatePercent: number;
+  capitalDisponible: number;
 }
 
 function formatAmount(value: number): string {
@@ -58,6 +59,7 @@ export function ResultsBreakdown({
   totalInterestEarned,
   capitalCible,
   savingsRatePercent,
+  capitalDisponible,
 }: ResultsBreakdownProps) {
   return (
     <div className="border border-neutral-200 rounded-lg px-6 py-5 mt-4">
@@ -78,6 +80,12 @@ export function ResultsBreakdown({
           label="Total de vos versements"
           value={`${formatAmount(totalContributions)} FCFA`}
         />
+        {capitalDisponible > 0 && (
+          <BreakdownRow
+            label="Capital deja disponible"
+            value={`${formatAmount(capitalDisponible)} FCFA`}
+          />
+        )}
         <BreakdownRow
           label="Les interets generes"
           value={`${formatAmount(totalInterestEarned)} FCFA`}
