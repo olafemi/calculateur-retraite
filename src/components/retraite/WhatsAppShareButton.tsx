@@ -51,6 +51,7 @@ function getViralVerdict(
   annualReturnRate: number,
   yearsToRetirement: number,
   revenuRetraite: number,
+  epargneMensuelle: number,
   currentSalary: number,
   statut: string | null
 ): { emoji: string; label: string; text: string } {
@@ -58,6 +59,11 @@ function getViralVerdict(
   const isEtudiant = statut === "etudiant";
   const isFreelance = statut === "freelance";
   const earnsBelowSmic = currentSalary > 0 && currentSalary <= SMIC_BENIN;
+  const rv = fmt(revenuRetraite);
+  const ep = fmt(epargneMensuelle);
+  const sal = fmt(currentSalary);
+  const pct = Math.round(savingsRatePercent);
+  const retPct = (annualReturnRate * 100).toFixed(1).replace(".", ",");
 
   // ── Pas de salaire déclaré ──
   if (hasNoSalary && !isEtudiant) {
@@ -65,29 +71,22 @@ function getViralVerdict(
       return {
         emoji: "\uD83E\uDD2F",
         label: "LE REVE EST PERMIS",
-        text: "Pas de salaire declare mais tu veux toucher des millions a la retraite ? Mon gars, commence par le premier million. Le reste c'est Netflix.",
+        text: `Pas de salaire declare mais tu veux toucher ${rv} F CFA a la retraite ? Mon gars, commence par trouver le premier wari. Le reste c'est Netflix.`,
       };
     }
     return {
       emoji: "\uD83E\uDDD8",
       label: "MODE SURVIE",
-      text: "Zero revenu mais tu planifies ta retraite ? L'intention est la, c'est deja ca. Maintenant faut trouver le wari.",
+      text: `Zero revenu mais tu veux ${rv} F CFA a la retraite ? L'intention est la, c'est deja ca. Maintenant faut trouver le wari pour mettre ${ep} F CFA de cote chaque mois.`,
     };
   }
 
   // ── Etudiant ──
   if (isEtudiant) {
-    if (revenuRetraite > 500_000) {
-      return {
-        emoji: "\uD83C\uDF93",
-        label: "ETUDIANT AMBITIEUX",
-        text: "Tu n'as meme pas encore recu ton premier salaire et tu veux 500k a la retraite ? Finis tes cours d'abord, on en reparle apres djo.",
-      };
-    }
     return {
-      emoji: "\uD83D\uDCDA",
-      label: "ETUDIANT MALIN",
-      text: "Planifier sa retraite pendant les etudes ? Tu es en avance sur 99% des gens. Si t'avais cette discipline pour reviser aussi...",
+      emoji: "\uD83C\uDF93",
+      label: "ETUDIANT AMBITIEUX",
+      text: `Tu n'as meme pas encore recu ton premier salaire et tu veux toucher ${rv} F CFA par mois a la retraite ? Ca veut dire ${ep} F CFA d'epargne par mois. Finis tes cours d'abord djo, on en reparle apres.`,
     };
   }
 
@@ -96,7 +95,7 @@ function getViralVerdict(
     return {
       emoji: "\uD83D\uDE80",
       label: "ASTRONAUTE FINANCIER",
-      text: "Plus de 15% de rendement annuel ? Meme Warren Buffett fait 20% et il est milliardaire. Tu investis ou exactement ? Dans les reves ?",
+      text: `${retPct}% de rendement annuel ? Meme Warren Buffett fait 20% et il est milliardaire. Tu investis ou exactement, dans les reves ? Avec les pieds sur terre, faudrait mettre bien plus que ${ep} F CFA par mois.`,
     };
   }
 
@@ -105,7 +104,7 @@ function getViralVerdict(
     return {
       emoji: "\uD83D\uDECF\uFE0F",
       label: "MODE MATELAS",
-      text: "Zero rendement. Tu mets ton argent sous le lit comme grand-mere ? L'inflation va te grignoter ca doucement comme le termite mange le bois.",
+      text: `Zero rendement, tu gardes tes ${ep} F CFA par mois sous le lit comme grand-mere ? L'inflation va te grignoter ca doucement comme le termite mange le bois. Investis un minimum djo !`,
     };
   }
 
@@ -115,13 +114,13 @@ function getViralVerdict(
       return {
         emoji: "\uD83D\uDCA8",
         label: "IMPOSSIBLE TOTAL",
-        text: "Djo, tu gagnes le SMIC et tu veux epargner plus que ton salaire ? Meme Dangote a pas commence comme ca. Revois le plan ou bien augmente le salaire d'abord.",
+        text: `Djo, tu gagnes ${sal} F CFA et tu veux mettre ${ep} F CFA de cote ? C'est ${pct}% de ton salaire. Meme Dangote a pas commence comme ca. Revois le plan ou augmente les revenus d'abord.`,
       };
     }
     return {
       emoji: "\uD83E\uDD21",
       label: "MISSION IMPOSSIBLE",
-      text: "Epargner plus que ce que tu gagnes ? C'est pas de l'ambition la, c'est de la science-fiction. Redescends sur terre et ajuste le curseur.",
+      text: `${ep} F CFA d'epargne par mois sur un salaire de ${sal} F CFA ? Ca fait ${pct}% djo. C'est pas de l'ambition, c'est de la science-fiction. Redescends sur terre.`,
     };
   }
 
@@ -130,7 +129,7 @@ function getViralVerdict(
     return {
       emoji: "\uD83D\uDE2D",
       label: "IRRATIONNEL",
-      text: "70% de ton salaire en epargne ? Tu comptes manger quoi pendant 30 ans ? De l'air, de l'eau et de l'ambition ? Meme le jeune du Ramadan c'est que un mois hein.",
+      text: `${pct}% de ton salaire en epargne, soit ${ep} F CFA par mois. Tu comptes manger quoi ? De l'air et de l'ambition ? Meme le jeune du Ramadan c'est qu'un mois hein.`,
     };
   }
 
@@ -139,7 +138,7 @@ function getViralVerdict(
     return {
       emoji: "\uD83D\uDE05",
       label: "HARDCORE",
-      text: "La moitie de ton wari chaque mois a la banque. T'es sur que c'est pas un voeu de careme ? Courage hein, c'est chaud mais c'est ton choix.",
+      text: `${ep} F CFA par mois, c'est ${pct}% de ton wari. T'es sur c'est pas un voeu de careme ? Pour toucher ${rv} F CFA a la retraite, faut souffrir un peu.`,
     };
   }
 
@@ -148,7 +147,7 @@ function getViralVerdict(
     return {
       emoji: "\uD83C\uDFAF",
       label: "FREELANCE WARRIOR",
-      text: "Freelance et 30%+ d'epargne ? Tu sais que ton revenu peut changer chaque mois non ? Chapeau si tu tiens, mais garde un matelas de securite aussi.",
+      text: `Freelance et ${ep} F CFA d'epargne par mois, soit ${pct}% de tes revenus ? Tu sais que ca peut changer chaque mois non ? Chapeau si tu tiens. Garde un matelas de securite quand meme.`,
     };
   }
 
@@ -157,7 +156,7 @@ function getViralVerdict(
     return {
       emoji: "\uD83D\uDCAA",
       label: "GUERRIER DU SMIC",
-      text: "Au SMIC et tu veux epargner 20%+ ? C'est 10 000 FCFA par mois, c'est serieux. Chaque franc compte. T'es un(e) vrai(e) la.",
+      text: `Au SMIC a ${sal} F CFA et tu veux mettre ${ep} F CFA de cote ? C'est ${pct}% de ton salaire. Chaque franc compte. T'es un(e) vrai(e) la, respect.`,
     };
   }
 
@@ -166,7 +165,7 @@ function getViralVerdict(
     return {
       emoji: "\u23F0",
       label: "REVEIL TARDIF",
-      text: "Il te reste moins de 3 ans ? C'est maintenant que tu te reveilles ? Djo, fallait y penser ya 20 ans. Mais bon, mieux vaut tard que jamais.",
+      text: `Il te reste ${yearsToRetirement} an${yearsToRetirement > 1 ? "s" : ""} et tu veux ${rv} F CFA par mois a la retraite ? Ca fait ${ep} F CFA a mettre de cote chaque mois. C'est maintenant que tu te reveilles djo ?`,
     };
   }
 
@@ -174,7 +173,7 @@ function getViralVerdict(
     return {
       emoji: "\uD83D\uDD25",
       label: "DERNIERE LIGNE DROITE",
-      text: "5 ans max. Chaque mois compte. Pas le moment de tchiller. Mets le paquet maintenant ou tu vas regretter a la retraite.",
+      text: `${yearsToRetirement} ans pour accumuler de quoi toucher ${rv} F CFA par mois. ${ep} F CFA d'epargne chaque mois, pas le moment de tchiller. Mets le paquet.`,
     };
   }
 
@@ -183,16 +182,16 @@ function getViralVerdict(
     return {
       emoji: "\uD83D\uDC51",
       label: "LIFESTYLE DE ROI",
-      text: "5 millions par mois a la retraite ? C'est pas une retraite ca, c'est un lifestyle de ministre. Tu vas manger du homard a Cotonou tous les jours ou bien ?",
+      text: `${rv} F CFA par mois a la retraite ? C'est pas une retraite ca, c'est un lifestyle de ministre. Faut mettre ${ep} F CFA de cote chaque mois. Tu manges du homard a Cotonou tous les jours ou bien ?`,
     };
   }
 
   // ── Confortable (< 10%) avec du temps ──
-  if (savingsRatePercent <= 10 && yearsToRetirement >= 20) {
+  if (savingsRatePercent > 0 && savingsRatePercent <= 10 && yearsToRetirement >= 20) {
     return {
       emoji: "\uD83C\uDF1F",
       label: "TRANQUILLE",
-      text: "Moins de 10% de ton salaire et t'as le temps devant toi. C'est le scenario reve. Le plus dur c'est de commencer. Arrete de reflechir, ouvre un compte.",
+      text: `${ep} F CFA par mois, c'est que ${pct}% de ton salaire. Pour toucher ${rv} F CFA a la retraite, c'est le scenario reve. Le plus dur c'est de commencer, arrete de reflechir.`,
     };
   }
 
@@ -201,7 +200,7 @@ function getViralVerdict(
     return {
       emoji: "\u2705",
       label: "REALISTE",
-      text: "C'est jouable. Avec de la discipline et de la regularite, tu seras le tonton ou la tantie que tout le quartier respecte. On est ensemble !",
+      text: `${ep} F CFA par mois pour toucher ${rv} F CFA a la retraite. C'est jouable. Avec de la discipline, tu seras le tonton ou la tantie que tout le quartier respecte. On est ensemble !`,
     };
   }
 
@@ -209,7 +208,7 @@ function getViralVerdict(
   return {
     emoji: "\uD83D\uDCAA",
     label: "AMBITIEUX",
-    text: "Ca va demander des sacrifices mais c'est faisable. Le secret c'est la regularite. Commence aujourd'hui, ton futur toi va te remercier grave.",
+    text: `${ep} F CFA par mois pour viser ${rv} F CFA a la retraite. Ca va demander des sacrifices mais c'est faisable. Commence aujourd'hui, ton futur toi va te remercier grave.`,
   };
 }
 
@@ -232,7 +231,7 @@ function generateShareImage(props: WhatsAppShareButtonProps): Promise<Blob> {
     savingsRatePercent,
   } = props;
 
-  const verdict = getViralVerdict(savingsRatePercent, annualReturnRate, yearsToRetirement, props.revenuRetraite, props.currentSalary, props.statut);
+  const verdict = getViralVerdict(savingsRatePercent, annualReturnRate, yearsToRetirement, props.revenuRetraite, epargneMensuelle, props.currentSalary, props.statut);
   const hasCapital = capitalDisponible > 0;
   const returnPct = (annualReturnRate * 100).toFixed(1).replace(".", ",");
 
@@ -298,12 +297,12 @@ function generateShareImage(props: WhatsAppShareButtonProps): Promise<Blob> {
   // ── Verdict badge (dynamic height based on text wrapping) ──
   const badgeY = 585;
   const badgeR = 12;
-  const badgeLineH = 26;    // line height for verdict body text
-  const badgeTextStart = 65; // first text line Y offset from badgeY
-  const badgePadBottom = 18; // bottom padding after last text line
+  const badgeLineH = 32;    // line height for verdict body text
+  const badgeTextStart = 70; // first text line Y offset from badgeY
+  const badgePadBottom = 20; // bottom padding after last text line
 
   // Pre-measure verdict text lines to compute dynamic badge height
-  ctx.font = `400 22px ${font}`;
+  ctx.font = `400 26px ${font}`;
   const maxTextW = W - 170;
   const words = verdict.text.split(" ");
   const wrappedLines: string[] = [];
@@ -356,11 +355,11 @@ function generateShareImage(props: WhatsAppShareButtonProps): Promise<Blob> {
 
   // Badge label text
   ctx.fillStyle = badgeTextColor;
-  ctx.font = `800 24px ${font}`;
-  ctx.fillText(`${verdict.emoji}  ${verdict.label}`, 85, badgeY + 35);
+  ctx.font = `800 28px ${font}`;
+  ctx.fillText(`${verdict.emoji}  ${verdict.label}`, 85, badgeY + 38);
 
   // Render pre-measured verdict text lines
-  ctx.font = `400 22px ${font}`;
+  ctx.font = `400 26px ${font}`;
   let lineY = badgeY + badgeTextStart;
   for (const wrappedLine of wrappedLines) {
     ctx.fillText(wrappedLine, 85, lineY);
@@ -372,7 +371,7 @@ function generateShareImage(props: WhatsAppShareButtonProps): Promise<Blob> {
   const cardY = badgeY + badgeH + 35;
   const cardW = W - 80;
   const rowCount = 7 + (hasCapital ? 1 : 0);
-  const rowH = 65;
+  const rowH = 72;
   const cardH = rowCount * rowH + 30;
   const cardR = 16;
 
@@ -399,20 +398,20 @@ function generateShareImage(props: WhatsAppShareButtonProps): Promise<Blob> {
 
   function drawRow(label: string, value: string, highlight?: boolean) {
     ctx.fillStyle = "#6B7280";
-    ctx.font = `400 24px ${font}`;
+    ctx.font = `400 28px ${font}`;
     ctx.fillText(label, px, ry);
     ctx.fillStyle = highlight ? "#1A6B5E" : "#111827";
-    ctx.font = `${highlight ? "800" : "700"} 24px ${font}`;
+    ctx.font = `${highlight ? "800" : "700"} 28px ${font}`;
     const vw = ctx.measureText(value).width;
     ctx.fillText(value, cardX + cardW - 35 - vw, ry);
-    ry += 18;
+    ry += 20;
     ctx.strokeStyle = "#E5E7EB";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(px, ry);
     ctx.lineTo(cardX + cardW - 35, ry);
     ctx.stroke();
-    ry += rowH - 18;
+    ry += rowH - 20;
   }
 
   drawRow("Capital a accumuler", `${fmt(capitalCible)} F CFA`, true);
